@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 
 /** Supported symmetric cipher algorithms for cascading encryption layers. */
-export type Algorithm = 'AES-256-GCM' | 'XChaCha20-Poly1305';
+export type Algorithm = 'AES-256-GCM' | 'AEGIS-256' | 'XChaCha20-Poly1305';
 
 // ---------------------------------------------------------------------------
 // Cipher suite interface

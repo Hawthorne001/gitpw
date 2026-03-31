@@ -17,7 +17,7 @@ import { cascade } from '../cascade.js';
 import { presets } from '../presets.js';
 import { encoding } from '../encoding.js';
 import { ARGON2_OPSLIMIT_MIN, ARGON2_MEMLIMIT_MIN } from '../argon2.js';
-import type { EncryptedData } from '../types.js';
+import type { Algorithm, EncryptedData } from '../types.js';
 
 // Use minimum Argon2 parameters for fast tests
 const TEST_OPS = ARGON2_OPSLIMIT_MIN;
@@ -219,12 +219,45 @@ test('cascade: mixed algorithms: XChaCha20 then GCM', async () => {
   assert.equal(encoding.bytesToText(decrypted), 'Reversed mixed cascade');
 });
 
+test('cascade: single layer of AEGIS-256', async () => {
+  const c = cascade({ layers: [presets.AEGIS_256] });
+  const passwordKey = await c.derivePasswordKey({
+    password: 'single-aegis',
+    opsLimit: TEST_OPS,
+    memLimit: TEST_MEM,
+  });
+  const { masterKey } = await c.generateMasterKey(passwordKey);
+
+  const plaintext = encoding.textToBytes('AEGIS-256 single layer');
+  const encrypted = await c.encrypt(plaintext, masterKey);
+  const decrypted = await c.decrypt(encrypted, masterKey);
+  assert.equal(encoding.bytesToText(decrypted), 'AEGIS-256 single layer');
+});
+
+test('cascade: three distinct algorithms: GCM, AEGIS-256, XChaCha20', async () => {
+  const c = cascade({
+    layers: [
+      presets.AES_256_GCM,
+      presets.AEGIS_256,
+      presets.XCHACHA20_POLY1305,
+    ],
+  });
+  const passwordKey = await c.derivePasswordKey({
+    password: 'triple-cascade',
+    opsLimit: TEST_OPS,
+    memLimit: TEST_MEM,
+  });
+  const { masterKey } = await c.generateMasterKey(passwordKey);
+
+  const plaintext = encoding.textToBytes('Three distinct algorithms');
+  const encrypted = await c.encrypt(plaintext, masterKey);
+  const decrypted = await c.decrypt(encrypted, masterKey);
+  assert.equal(encoding.bytesToText(decrypted), 'Three distinct algorithms');
+});
+
 test('cascade: many layers: 5x AES-256-GCM', async () => {
   const c = cascade({
-    layers: Array(5).fill(presets.AES_256_GCM) as (
-      | 'AES-256-GCM'
-      | 'XChaCha20-Poly1305'
-    )[],
+    layers: Array(5).fill(presets.AES_256_GCM) as Algorithm[],
   });
   const passwordKey = await c.derivePasswordKey({
     password: 'five-layers',

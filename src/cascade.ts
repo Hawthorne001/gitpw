@@ -35,6 +35,7 @@
  */
 
 import { aesGcm } from './aesGcm.js';
+import { aegis256 } from './aegis256.js';
 import { xchacha20 } from './xchacha20.js';
 import {
   kdf,
@@ -64,6 +65,7 @@ import type {
 
 const SUITES: Record<Algorithm, CipherSuite> = {
   'AES-256-GCM': aesGcm,
+  'AEGIS-256': aegis256,
   'XChaCha20-Poly1305': xchacha20,
 };
 

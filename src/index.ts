@@ -7,6 +7,7 @@ export { cascade } from './cascade.js';
 
 // Algorithm cipher suites
 export { aesGcm } from './aesGcm.js';
+export { aegis256 } from './aegis256.js';
 export { xchacha20 } from './xchacha20.js';
 
 // Key derivation primitives

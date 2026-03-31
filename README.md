@@ -6,7 +6,7 @@ Isomorphic TypeScript library for cascading encryption. Encrypt data through mul
 
 Inspired by VeraCrypt's cascading encryption, Cascade lets you specify an arbitrary sequence of encryption algorithms. Data passes through each layer in order, with independent keys derived for every layer.
 
-Uses **libsodium** (via `libsodium-wrappers-sumo`) for Argon2id password hashing, XChaCha20-Poly1305 encryption, KDF, and secure memory wiping. Uses the **Web Crypto API** for AES-256-GCM encryption (ensuring isomorphic support across all platforms).
+Uses **libsodium** (via `libsodium-wrappers-sumo`) for Argon2id password hashing, XChaCha20-Poly1305 encryption, AEGIS-256 encryption, KDF, and secure memory wiping. Uses the **Web Crypto API** for AES-256-GCM encryption (ensuring isomorphic support across all platforms).
 
 ## Key Hierarchy
 
@@ -37,10 +37,11 @@ Data <--> Encrypted by content subkeys
 
 ## Algorithm Presets
 
-| Preset               | Cipher             | Authentication      | Key Length |
-| -------------------- | ------------------ | ------------------- | ---------- |
-| `AES-256-GCM`        | AES-GCM, 256-bit   | Built-in (GHASH)    | 32 bytes   |
-| `XChaCha20-Poly1305` | XChaCha20, 256-bit | Built-in (Poly1305) | 32 bytes   |
+| Preset               | Cipher                       | Authentication         | Key Length |
+| -------------------- | ---------------------------- | ---------------------- | ---------- |
+| `AES-256-GCM`        | AES-GCM, 256-bit             | Built-in (GHASH)       | 32 bytes   |
+| `AEGIS-256`          | AEGIS-256 (AES-round sponge) | Built-in (256-bit tag) | 32 bytes   |
+| `XChaCha20-Poly1305` | XChaCha20, 256-bit           | Built-in (Poly1305)    | 32 bytes   |
 
 ## Usage
 
@@ -55,11 +56,7 @@ import {
 
 // Configure a 3-layer cascade
 const c = cascade({
-  layers: [
-    presets.AES_256_GCM,
-    presets.XCHACHA20_POLY1305,
-    presets.AES_256_GCM,
-  ],
+  layers: [presets.AES_256_GCM, presets.AEGIS_256, presets.XCHACHA20_POLY1305],
 });
 
 // Derive password key (store salt + opsLimit + memLimit for re-derivation)
